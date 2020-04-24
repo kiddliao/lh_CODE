@@ -128,7 +128,7 @@ class FocalLoss(nn.Module):
             # classification_losses为该batch所有图片的分类损失
             classification_losses.append(cls_loss.sum() / torch.clamp(num_positive_anchors.to(dtype), min=1.0))
 
-            if positive_indices.sum() > 0:  #如果有正样本就计算回归损失
+            if positive_indices.sum() > 0:  #如果有正样本就计算回归损失 也就是yolov3里的置信度超过某个值就认为有物体 才对其进行预测和计算回归损失
                 # assigned_annotations现在是iou大于阈值的目标框对应的gt框
                 assigned_annotations = assigned_annotations[positive_indices, :]
                 # 转换为中心点坐标和宽高的格式
