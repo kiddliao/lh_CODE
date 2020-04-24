@@ -44,6 +44,12 @@ class FocalLoss(nn.Module):
         batch_size = classifications.shape[0]
         classification_losses = []
         regression_losses = []
+        # anchor是由不同尺度的每个网格的中心点和每个网格对应的几个anchor框而计算出来的目标框
+        # 假如第i个网格的anchor框和gt的第一个框IOU最大 那么代表该网格能不错的预测这个gt框
+        # 那么就用这个网格的这个anchor框去预测这个gt框
+        # 之后计算分类损失也对该gt框的类别计算损失
+
+
         # anchor是所有尺度的所有网格预测的框
         anchor = anchors[0, :, :]  # assuming all image sizes are the same, which it is
         dtype = anchors.dtype
@@ -153,9 +159,11 @@ class FocalLoss(nn.Module):
 
                 targets = torch.stack((targets_dy, targets_dx, targets_dh, targets_dw))
                 targets = targets.t()
+                # 实际的偏移量是gt框相对于落入的网格的左上角的坐标偏移和宽高偏移
+                # 预测的偏移就是经过神经网络计算的(x,4)维特征矩阵
                 # 预测的偏移量和实际的偏移量之间的差距
                 regression_diff = torch.abs(targets - regression[positive_indices, :])
-                # 分段损失函数 连续且可导
+                # 分段损失函数 连续且可导 l1正则化
                 regression_loss = torch.where(
                     torch.le(regression_diff, 1.0 / 9.0),
                     0.5 * 9.0 * torch.pow(regression_diff, 2),
