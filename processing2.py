@@ -5,6 +5,7 @@ import re
 import time
 import shutil
 from functools import cmp_to_key
+#对coco格式的数据集重新划分
 f1 = open(os.path.join('coco', 'annotations', 'instances_train2017.json'), 'r')
 f2 = open(os.path.join('coco', 'annotations', 'instances_test2017.json'), 'r')
 f3 = open(os.path.join('coco', 'annotations', 'instances_val2017.json'), 'r')

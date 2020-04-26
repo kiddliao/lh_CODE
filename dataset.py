@@ -7,13 +7,15 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from pycocotools.coco import COCO
 from torchvision import transforms
+#实现图片读取的数据管道
+os.chdir(os.path.join('..','REMOTE','datasets','VOC_competition'))
 class FlirDataset(Dataset):
     def __init__(self, root_dir, set_name, cal_mean_std=False, mean_std_path=None, transform=None):
         self.set_name = set_name
         self.root_dir = root_dir
         # self.img_path = glob.glob(os.path.join('coco',self.set_name,'*.jpg'))
         self.transform = transform
-        self.coco = COCO(os.path.join(self.root_dir, 'annotations', 'newinstances_' + self.set_name + '.json'))
+        self.coco = COCO(os.path.join(self.root_dir, 'Annotations', 'newinstances_' + self.set_name + '.json'))
         self.image_ids = self.coco.getImgIds()  #获取image在标注文件里的id 0-n label["images"][0]["image_id"]
         self.load_classes()
         self.cal_mean_std = cal_mean_std
@@ -69,13 +71,14 @@ class FlirDataset(Dataset):
         return sample
     def load_image(self, image_index):
         image_name = self.coco.loadImgs(self.image_ids[image_index])[0]  #loadImgs是返回一个列表 里面放的是label["images"][i]
-        image_path = os.path.join(self.root_dir, self.set_name, image_name['file_name'])
+        image_path = os.path.join(self.root_dir, 'JPEGImages', image_name['file_name'])
+        # image_path = os.path.join(self.root_dir, self.set_name, image_name['file_name'])
         #三通道图片
-        # img = cv2.imread(image_path)
-        # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        img = cv2.imread(image_path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         #单通道图片
-        img = cv2.imread(image_path, 0)
-        img=img.reshape((*img.shape,1))
+        # img = cv2.imread(image_path, 0)
+        # img=img.reshape((*img.shape,1))
         return img.astype(np.float32) / 255.
     def load_annotations(self, image_index):
         # coco.getAnnIds()返回label["annotations"]里'image_id'是i的所有标注的"id"
@@ -145,12 +148,12 @@ class Resizer(object):
         
         image = cv2.resize(image, (resized_width, resized_height), interpolation=cv2.INTER_LINEAR)
         #三通道图
-        # new_image = np.zeros((self.img_size, self.img_size, 3))
-        # new_image[0:resized_height, 0:resized_width] = image #注意这里没有居中直接把新图放到了左上角
+        new_image = np.zeros((self.img_size, self.img_size, 3))
+        new_image[0:resized_height, 0:resized_width] = image #注意这里没有居中直接把新图放到了左上角
         #单通道图
-        new_image = np.zeros((self.img_size, self.img_size))
-        new_image[0:resized_height, 0:resized_width] = image
-        new_image = new_image.reshape((*(new_image.shape), 1))      
+        # new_image = np.zeros((self.img_size, self.img_size))
+        # new_image[0:resized_height, 0:resized_width] = image
+        # new_image = new_image.reshape((*(new_image.shape), 1))      
         annots[:,:4] *= scale  #coco里的左上角和右下角的坐标代表距离图片左上顶点的距离 所以直接乘上scale
         return {'img': torch.from_numpy(new_image).to(torch.float32), 'annot': torch.from_numpy(annots), 'scale': scale}
 

@@ -1,13 +1,13 @@
 import os
 import json
 import cv2
-from tensorboardX import SummaryWriter
 import random
 import re
 import time
 import shutil
 from functools import cmp_to_key
 import tensorboardX
+#查看数据集的样本种类的个数并打印偏移gt框
 category={1:'person',2:'bicycle',3:'car'}
 f1 = open(os.path.join('coco', 'annotations', 'newinstances_train2017.json'), 'r')
 f2 = open(os.path.join('coco', 'annotations', 'newinstances_test2017.json'), 'r')

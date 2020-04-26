@@ -2,8 +2,10 @@ import cv2
 import os
 import random
 import json
-category={1:'person',2:'bicycle',3:'car'}
-with open(os.path.join('coco', 'annotations', 'newinstances_val2017.json'), 'r') as f:
+#随即打印图片以及gt框来检验数据集标注是否有问题
+os.chdir(os.path.join('..','REMOTE','datasets','VOC_competition'))
+category={1:'car',2:'ship',3:'human',4:'plane'}
+with open(os.path.join('Annotations', 'newinstances_val2017.json'), 'r') as f:
     label = json.load(f)
     images = label['images']
     categories = label['categories']
@@ -20,7 +22,7 @@ with open(os.path.join('coco', 'annotations', 'newinstances_val2017.json'), 'r')
             if res['image_id'] == img_id:
                 flag += 1
                 bbox.append([*res['bbox'], res['category_id']])
-        pic = cv2.imread(os.path.join('coco', 'val2017', img_name), 0)
+        pic = cv2.imread(os.path.join('JPEGImages', img_name))
         for box in bbox:
             x, y, w, h, id = box
             cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度

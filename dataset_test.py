@@ -4,16 +4,20 @@ from dataset import FlirDataset, collater, Resizer, Normalizer, Augmenter
 from tqdm.autonotebook import tqdm
 import cv2
 import numpy as np
+import os
+#测试图片读取的数据管道
+print(os.getcwd())
+# os.chdir(os.path.join('..','REMOTE','datasets','FLIR_pt_efficientDet'))
 category={0:'person',1:'bicycle',2:'car'}
 
-root_dir = 'coco'
+root_dir = ''
 set_name = 'train2017'
 mspath='mean_std.txt'
 batch_size = 1
 #先求一下均值和方差
 training_set = FlirDataset(root_dir, set_name, mean_std_path=mspath
-, cal_mean_std=False, transform=transforms.Compose([
-    Normalizer(mean_std_path=mspath),Augmenter(),Resizer(512)]))
+, cal_mean_std=True, transform=transforms.Compose([
+    Normalizer(),Augmenter(),Resizer(1280)]))
 # a = training_set[0]  #取一个样本看看
 # cv2.imshow('image', a['img'].numpy())
 # cv2.waitKey(0)

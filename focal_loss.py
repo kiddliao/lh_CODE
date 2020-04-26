@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import cv2
 import numpy as np
+#实现focal loss
 def calc_iou(a, b):
     # a(anchor) [boxes, (y1, x1, y2, x2)]
     # b(gt, coco-style) [boxes, (x1, y1, x2, y2)]
