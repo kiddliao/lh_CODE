@@ -176,5 +176,5 @@ for filename in files:
     portion = os.path.splitext(filename)#portion为名称和后缀分离后的列表
     if portion[1] != '.jpg':
         newname = portion[0]+".jpg"
-        print(filename,'-->',newname)
+        # print(filename,'-->',newname)
         os.rename(os.path.join('JPEGImages',filename),os.path.join('JPEGImages',newname))
