@@ -12,6 +12,7 @@ classes={'car':1,'ship':2,'human':3,'plane':4}
 os.chdir(os.path.join('..','REMOTE', 'datasets', 'VOC_competition'))
 #读取xml并转换为annotations.json
 xmlpaths = glob.glob(os.path.join('Annotations', '*.xml'))
+xmlpaths.sort()
 label = {}
 image_id = 0
 annotation_id = 0
@@ -170,11 +171,11 @@ print_count(val)
 print('---------数据集----------')
 print_count(label)
 
-#把png改为jpg
-files = os.listdir(os.path.join("JPEGImages"))
-for filename in files:
-    portion = os.path.splitext(filename)#portion为名称和后缀分离后的列表
-    if portion[1] != '.jpg':
-        newname = portion[0]+".jpg"
-        # print(filename,'-->',newname)
-        os.rename(os.path.join('JPEGImages',filename),os.path.join('JPEGImages',newname))
+# #把png改为jpg
+# files = os.listdir(os.path.join("JPEGImages"))
+# for filename in files:
+#     portion = os.path.splitext(filename)#portion为名称和后缀分离后的列表
+#     if portion[1] != '.jpg':
+#         newname = portion[0]+".jpg"
+#         # print(filename,'-->',newname)
+#         os.rename(os.path.join('JPEGImages',filename),os.path.join('JPEGImages',newname))

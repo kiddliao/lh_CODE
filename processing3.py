@@ -8,7 +8,7 @@ import shutil
 from functools import cmp_to_key
 import tensorboardX
 #查看数据集的样本种类的个数并打印偏移gt框
-category={1:'person',2:'bicycle',3:'car'}
+category={1:'person',2:'bicycle',3:'car',4:'dog'}
 f1 = open(os.path.join('coco', 'annotations', 'newinstances_train2017.json'), 'r')
 f2 = open(os.path.join('coco', 'annotations', 'newinstances_test2017.json'), 'r')
 f3 = open(os.path.join('coco', 'annotations', 'newinstances_val2017.json'), 'r')
