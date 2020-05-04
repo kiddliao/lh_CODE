@@ -5,16 +5,20 @@ import json
 import glob
 #随机打印voc数据集图片以及gt框来检验数据集标注是否有问题
 os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_shape'))
+pic_paths = glob.glob(os.path.join('*','*.jpg'))
+pic = cv2.imread(pic_paths[0])
+pic_shape=list(pic.shape)
+
 # category={1:'person',2:'bicycle',3:'car',4:'dog'}
 # category={1:'car',2:'ship',3:'human',4:'plane'}
 category = {1: 'rectangle', 2: 'circle'}
-label_paths = glob.glob(os.path.join('labels', '*.txt'))#直接读取每张图的标签
+label_paths = glob.glob(os.path.join('labels', '*', '*.txt'))#直接读取每张图的标签
 # with open(os.path.join('train_all_labels.txt'), 'r') as f:#读取train_all_labels.txt的标签
     # label_paths = f.readlines()
 label_paths = list(map(lambda x: x.strip().split(' ')[0], label_paths))
 random.shuffle(label_paths)
 for i in range(10):
-    直接读标签
+    #直接读标签
     label_path = label_paths[i]
     img_name = label_path.strip().split('\\')[-1].split('.')[0]
     pic=cv2.imread(os.path.join('images', img_name + '.jpg'))
@@ -34,6 +38,8 @@ for i in range(10):
         cname = category[cid+1]
         xc, yc, w, h = list(map(float, i.strip().split(' ')[1:]))
         x, y, w, h = int(xc - w / 2), int(yc - h / 2), int(w), int(h)
+        # x, y, w, h = int((xc - w / 2) * pic_shape[0]), int((yc - h / 2) * pic_shape[1]), int(w * pic_shape[0]), int(h * pic_shape[1])
+
         cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度
         cv2.putText(pic, '{}, {:.3f}'.format(cname, 1),
                     (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
