@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from functools import cmp_to_key
 #将voc格式数据集转换为coco格式并划分数据集
 classes={'car':1,'ship':2,'human':3,'plane':4}
-os.chdir(os.path.join('..','REMOTE', 'datasets', 'VOC_competition'))
+os.chdir(os.path.join('..','REMOTE', 'datasets', 'coco_obstract'))
 #读取xml并转换为annotations.json
 xmlpaths = glob.glob(os.path.join('Annotations', '*.xml'))
 xmlpaths.sort()
@@ -107,7 +107,7 @@ def process(res):
     res['images'].sort(key=cmp_to_key(compare1))
     res['annotations'].sort(key=cmp_to_key(compare2))
     for i in range(len(res['annotations'])):
-        res['annotations'][i]['id'] = i
+        res['annotations'][i]['id'] = i + 1
     for i in range(len(res['images'])):
         id = res['images'][i]['id']
         res['images'][i]['id'] = i
