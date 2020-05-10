@@ -11,7 +11,7 @@ from itertools import chain
 #转换val的标注文件
 # os.chdir(os.path.join('..', 'datasets', 'coco_xray'))
 os.makedirs('JPEGImages', exist_ok=True)
-os.makedirs('Annotations', exist_ok=True)
+os.makedirs('labels', exist_ok=True)
 # os.makedirs('test', exist_ok=True)
 # os.makedirs(os.path.join('labels','test'), exist_ok=True)
 # os.makedirs(os.path.join('labels','train'), exist_ok=True)
@@ -35,7 +35,9 @@ def create_annot_txt(name):
 
     # init_id = int(rg.search(images[0]['file_name']).group())
     for i in range(len(annotations)):
-        file_name=dic[annotations[i]['image_id']]
+        file_name = dic[annotations[i]['image_id']]
+        # if file_name == 'FLIR_05171.jpg':
+        #     print(1)
         pic = cv2.imread(os.path.join('JPEGImages',file_name))
         pic_shape=list(pic.shape)
         # cur_id = int(annotations[i]['image_id'])
@@ -44,15 +46,15 @@ def create_annot_txt(name):
         # if label_id == 17: label_id = 4
         annotations[i]['bbox'][0] += annotations[i]['bbox'][2] / 2
         annotations[i]['bbox'][1] += annotations[i]['bbox'][3] / 2
-        annotations[i]['bbox'][0] /= pic_shape[0]
-        annotations[i]['bbox'][2] /= pic_shape[0]
-        annotations[i]['bbox'][1] /= pic_shape[1]
-        annotations[i]['bbox'][3] /= pic_shape[1]
+        annotations[i]['bbox'][0] /= pic_shape[1]
+        annotations[i]['bbox'][2] /= pic_shape[1]
+        annotations[i]['bbox'][1] /= pic_shape[0]
+        annotations[i]['bbox'][3] /= pic_shape[0]
 
         
         writein_label = ' '.join(list(map(str,[label_id-1] + annotations[i]['bbox']))) #录入的时候id-1
         
-        with open(os.path.join('Annotations','{}.txt'.format(file_name.split('.')[0])), 'a+') as f:
+        with open(os.path.join('labels','{}.txt'.format(file_name.split('.')[0])), 'a+') as f:
             f.write(writein_label+'\n')
     
 create_annot_txt('train')
@@ -62,13 +64,13 @@ create_annot_txt('val')
 
 #对无样本图片新建空标签文本 但是这个项目不接受空的label所以注释掉
 img_name = os.listdir('JPEGImages')
-label_name = os.listdir('Annotations')
-img_name = set(list(map(lambda x:x.split('.')[0], img_name)))
-label_name = set(list(map(lambda x:x.split('.')[0], label_name)))
-no_name=list(img_name - label_name)
-for i in range(len(no_name)):
-    with open(os.path.join('Annotations','{}.txt'.format(no_name[i])), 'a+') as f:
-        print(no_name[i])
+# label_name = os.listdir('labels')
+# img_name = set(list(map(lambda x:x.split('.')[0], img_name)))
+# label_name = set(list(map(lambda x:x.split('.')[0], label_name)))
+# no_name=list(img_name - label_name)
+# for i in range(len(no_name)):
+#     with open(os.path.join('labels','{}.txt'.format(no_name[i])), 'a+') as f:
+#         print(no_name[i])
 
 # img_name = glob.glob(os.path.join('*', '*.jpg'))
 # del_img = glob.glob(os.path.join('images', '*.jpg'))
@@ -101,15 +103,28 @@ with open(os.path.join('coco','annotations', 'newinstances_train2017.json'), 'r+
     train = json.load(f)
 with open(os.path.join('coco','annotations', 'newinstances_val2017.json'), 'r+', encoding='utf-8') as f:
     val = json.load(f)
+train_name, val_name = set(), set()
+dic1 = {}
+dic2 = {}
+#建立映射 得空的时候优化一下 前面也有映射
+for i in train['images']:
+    dic1[i['id']] = i['file_name']
+for i in val['images']:
+    dic2[i['id']] = i['file_name']
+for i in train['annotations']:
+    train_name.add(dic1[i['image_id']])
+for i in val['annotations']:
+    val_name.add(dic2[i['image_id']])  
+
 with open('train.txt','w') as f:
-    for i in range(len(train['images'])):
-        f.write(os.path.join(cur_path, 'JPEGImages', train['images'][i]['file_name']) + '\n')
+    for i in train_name:
+        f.write(os.path.join(cur_path, 'JPEGImages', i) + '\n')
 with open('valid.txt','w') as f:
-    for i in range(len(val['images'])):
-        f.write(os.path.join(cur_path, 'JPEGImages', val['images'][i]['file_name']) + '\n')
+    for i in val_name:
+        f.write(os.path.join(cur_path, 'JPEGImages', i) + '\n')
 with open('trainval.txt','w') as f:
-    for i in chain(train['images'],val['images']):
-        f.write(os.path.join(cur_path, 'JPEGImages',i['file_name']) + '\n')
+    for i in chain(train_name,val_name):
+        f.write(os.path.join(cur_path, 'JPEGImages',i) + '\n')
     
 
 
@@ -123,7 +138,7 @@ with open('train_all_labels.txt', 'w') as f:
         image_name=image_path.split('/')[-1].split('.')[0]
         # image_name=image_path.split('\\')[-1].split('.')[0]
         # image_id = rg.search(image_path).group()
-        with open(os.path.join('Annotations', image_name + '.txt'), 'r') as f2:
+        with open(os.path.join('labels', image_name + '.txt'), 'r') as f2:
             labels = f2.readlines()
             image_label = ''
             for j in range(len(labels)):

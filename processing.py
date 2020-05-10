@@ -3,9 +3,9 @@ import os
 import random
 import json
 #随机打印coco数据集图片以及gt框来检验数据集标注是否有问题
-os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_obstract'))
-# category={1:'person',2:'bicycle',3:'car',4:'dog'}
-category={1:'car',2:'ship',3:'human',4:'plane'}
+os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_flir','coco'))
+category={1:'person',2:'bicycle',3:'car',4:'dog'}
+# category={1:'car',2:'ship',3:'human',4:'plane'}
 # category={1:"Consolidation",
 # 2:"Fibrosis",
 # 3:"Effusion",
@@ -16,7 +16,7 @@ category={1:'car',2:'ship',3:'human',4:'plane'}
 # 8:"Atelectasis",
 # 9:"Fracture"
 # }
-with open(os.path.join('Annotations','newinstances_train2017.json'), 'r') as f:
+with open(os.path.join('annotations','newinstances_train2017.json'), 'r') as f:
     label = json.load(f)
     images = label['images']
     categories = label['categories']
@@ -33,13 +33,13 @@ with open(os.path.join('Annotations','newinstances_train2017.json'), 'r') as f:
             if res['image_id'] == img_id:
                 flag += 1
                 bbox.append([*res['bbox'], res['category_id']])
-        pic = cv2.imread(os.path.join('JPEGImages', img_name))
+        pic = cv2.imread(os.path.join('train2017', img_name))
         for box in bbox:
             x, y, w, h, id = box
             cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度
             cv2.putText(pic, '{}, {:.3f}'.format(category[id], 1),
-                        (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 1.5,
-                        (255, 255, 0), 2)
+                        (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                        (255, 255, 0), 1)
         cv2.namedWindow(img_name)
         # cv2.resizeWindow(img_name, 416, 416)
         cv2.imshow(img_name, pic)
