@@ -129,24 +129,24 @@ with open('trainval.txt','w') as f:
 
 
 #train的图片路径和label来生成kmeans的anchor
-f1 = open('train.txt', 'r')
-train_path = f1.readlines()
-f1.close()
-with open('train_all_labels.txt', 'w') as f:
-    for i in range(len(train_path)):
-        image_path = train_path[i].strip()
-        image_name=image_path.split('/')[-1].split('.')[0]
-        # image_name=image_path.split('\\')[-1].split('.')[0]
-        # image_id = rg.search(image_path).group()
-        with open(os.path.join('labels', image_name + '.txt'), 'r') as f2:
-            labels = f2.readlines()
-            image_label = ''
-            for j in range(len(labels)):
-                cur_label = labels[j].strip().split()
-                cur_label = cur_label[1:] + [cur_label[0]]
-                image_label += ','.join(cur_label)+' '
-        write_in = image_path + ' ' + image_label.strip()
-        f.write(write_in + '\n')
+# f1 = open('train.txt', 'r')
+# train_path = f1.readlines()
+# f1.close()
+# with open('train_all_labels.txt', 'w') as f:
+#     for i in range(len(train_path)):
+#         image_path = train_path[i].strip()
+#         image_name=image_path.split('/')[-1].split('.')[0]
+#         # image_name=image_path.split('\\')[-1].split('.')[0]
+#         # image_id = rg.search(image_path).group()
+#         with open(os.path.join('labels', image_name + '.txt'), 'r') as f2:
+#             labels = f2.readlines()
+#             image_label = ''
+#             for j in range(len(labels)):
+#                 cur_label = labels[j].strip().split()
+#                 cur_label = cur_label[1:] + [cur_label[0]]
+#                 image_label += ','.join(cur_label)+' '
+#         write_in = image_path + ' ' + image_label.strip()
+#         f.write(write_in + '\n')
         
 #把labels下的txt放入labels/train val test
 # def move(name, res):

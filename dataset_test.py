@@ -8,7 +8,7 @@ import os
 #测试图片读取的数据管道
 print(os.getcwd())
 # os.chdir(os.path.join('..','REMOTE','datasets','FLIR_pt_efficientDet'))
-category={0:'person',1:'bicycle',2:'car'}
+# category={0:'person',1:'bicycle',2:'car'}
 
 root_dir = ''
 set_name = 'train2017'
