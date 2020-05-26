@@ -147,9 +147,9 @@ class COCOeval:
             computeIoU = self.computeIoU
         elif p.iouType == 'keypoints':
             computeIoU = self.computeOks
-        self.ious = {(imgId, catId): computeIoU(imgId, catId) \
-                        for imgId in p.imgIds
-                        for catId in catIds}  #双层循环,对每张图片检测每个类
+        # self.ious = {(imgId, catId): computeIoU(imgId, catId) \
+        #                 for imgId in p.imgIds
+        #                 for catId in catIds}  #双层循环,对每张图片检测每个类
         self.lh_ious = {(imgId, catId): self.lh_computeIoU(imgId, catId) \
                         for imgId in p.imgIds
                         for catId in catIds} #双层循环,对每张图片检测每个类
@@ -158,12 +158,13 @@ class COCOeval:
                     
         evaluateImg = self.evaluateImg
         maxDet = p.maxDets[-1]
-        self.evalImgs = [evaluateImg(imgId, catId, areaRng, maxDet)
-                 for catId in catIds
-                 for areaRng in p.areaRng #全部尺寸 小中大 一共四个尺寸 [0,1024,9216,1e10]
-                 for imgId in p.imgIds
-             ]
-        self.lh_evalImgs = [self.lh_evaluateImg(imgId, catId, areaRng, maxDet)
+        # self.evalImgs = [evaluateImg(imgId, catId, areaRng, maxDet)
+        #          for catId in catIds
+        #          for areaRng in p.areaRng #全部尺寸 小中大 一共四个尺寸 [0,1024,9216,1e10]
+        #          for imgId in p.imgIds
+        #      ]
+        self.evalImgs = [self.lh_evaluateImg(imgId, catId, areaRng, maxDet)
+        # self.lh_evalImgs = [self.lh_evaluateImg(imgId, catId, areaRng, maxDet)
                  for catId in catIds
                  for areaRng in p.areaRng 
                  for imgId in p.imgIds
@@ -628,11 +629,11 @@ class COCOeval:
                 tmp = xray_recall.sum(axis=0) / 9
                 final_tmp = tmp[:3].mean()
                 lhfm = ' {:<18} {} @[ IoU={:<10} | area={:>6s} | maxDets={:>3s} ] = {:0.3f}'
-                # print(lhfm.format('TPR[fpr=0.05]','ATPR','0.5','all','100',tmp[0]))
-                # print(lhfm.format('TPR[fpr=0.10]','ATPR','0.5','all','100',tmp[1]))
-                # print(lhfm.format('TPR[fpr=0.20]','ATPR','0.5','all','100',tmp[2]))
-                # # print(lhfm.format('TPR[fpr=maxfpr]','ATPR','0.5','all','100',tmp[3]))
-                # print(lhfm.format('Average TPR', 'ATPR', '0.5', 'all', '100', final_tmp))
+                print(lhfm.format('TPR[fpr=0.05]','ATPR','0.5','all','100',tmp[0]))
+                print(lhfm.format('TPR[fpr=0.10]','ATPR','0.5','all','100',tmp[1]))
+                print(lhfm.format('TPR[fpr=0.20]','ATPR','0.5','all','100',tmp[2]))
+                # print(lhfm.format('TPR[fpr=maxfpr]','ATPR','0.5','all','100',tmp[3]))
+                print(lhfm.format('Average TPR', 'ATPR', '0.5', 'all', '100', final_tmp))
                 return tmp[:3].tolist()+[final_tmp]
 
             if ap != 2: 
@@ -640,7 +641,7 @@ class COCOeval:
                     mean_s = -1
                 else:
                     mean_s = np.mean(s[s>-1]) #均值
-                # print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
+                print(iStr.format(titleStr, typeStr, iouStr, areaRng, maxDets, mean_s))
                 return mean_s
         def _summarizeDets():
             stats = np.zeros((12,))
@@ -750,4 +751,4 @@ if __name__ == '__main__':
         #     coco_eval.accumulate()
         #     coco_eval.summarize()
 
-    _eval(coco_gt, image_ids, 'result_val.json')
+    _eval(coco_gt, image_ids, 'new_val.json')
