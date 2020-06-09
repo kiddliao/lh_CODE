@@ -5,12 +5,13 @@ import glob
 from collections import defaultdict
 import torch
 from lh_coco_eval import COCOeval
+# from pycocotools.cocoeval import COCOeval
 from pycocotools.coco import COCO
 import threading
 import time
 import copy
 
-NAME='val'
+NAME='test'
 
 def lh_IOU(box1, box2, x1y1x2y2=False, iou_type='IoU'):
     # Returns the IoU of box1 to box2. box1 is 4, box2 is nx4
@@ -97,7 +98,7 @@ def lh_NMS(prediction, conf_thresh=0.4, iou_thresh=0.5, style='OR',type='IoU'):
     #             prediction[ind_ious_bool,:] *= 0
     #             box_corner[ind_ious_bool,:] *= 0
     dc = prediction.clone()
-    if style == 'OR':
+    if style == 'OR': #fast nms(传统的NMS可以利用矩阵简化从而降低时间,但不得不牺牲一些精度,实验结果显示虽然降低了0.1mAP,但时间比基于Cython实现的NMS快11.8ms)
         # METHOD1
         # ind = list(range(len(dc)))
         # while len(ind):
@@ -127,8 +128,8 @@ def lh_NMS(prediction, conf_thresh=0.4, iou_thresh=0.5, style='OR',type='IoU'):
                 break
             i = lh_IOU(dc[0], dc,iou_type=type) > iou_thresh
             weights = dc[i, 4:5]
-            if torch.isnan(((weights * dc[i,:4]).sum(0) / weights.sum())[0]):
-                print(1)
+            # if torch.isnan(((weights * dc[i,:4]).sum(0) / weights.sum())[0]):
+            #     print(1)
             dc[0,:4] = (weights * dc[i,:4]).sum(0) / weights.sum()
             det_max.append(dc[:1].squeeze().tolist())
             dc = dc[i == 0]
@@ -143,7 +144,7 @@ def lh_NMS(prediction, conf_thresh=0.4, iou_thresh=0.5, style='OR',type='IoU'):
             iou = lh_IOU(dc[0], dc[1:],iou_type=type)
             dc = dc[1:]
             dc[:, 4] *= torch.exp(-iou ** 2 / sigma)  #decay confidences
-            dc = dc[dc[:, 4] > iou_thresh]  # new line per https://github.com/ultralytics/yolov3/issues/362
+            dc = dc[dc[:, 4] > conf_thresh]  # new line per https://github.com/ultralytics/yolov3/issues/362
     return det_max
 
 def count_num(ensembled_pred,j):
@@ -192,47 +193,55 @@ def _eval(coco_gt, image_ids, pred_json_path):#image_ids是所有测试集有标
     coco_eval.params.imgIds = image_ids #如果检测图片数大于MAX_IMAGES 修改当前gt图片的id在MAX_IMAGES之内
     coco_eval.evaluate() #评估
     coco_eval.accumulate()
-    tpr = coco_eval.summarize()
-    
-    for cat in coco_pred.cats.values():
-        print(f"{cat['name']}类的BBOX")
-        coco_eval.params.catIds = [cat['id']]
-        coco_eval.params.imgIds = image_ids
-        coco_eval.evaluate()
-        coco_eval.accumulate()
-        coco_eval.summarize()
-    return tpr
+    mAP = coco_eval.summarize()
+    res=[mAP]
+    # for cat in coco_pred.cats.values():
+    #     # print(f"{cat['name']}类的BBOX")
+    #     coco_eval.params.catIds = [cat['id']]
+    #     coco_eval.params.imgIds = image_ids
+    #     coco_eval.evaluate()
+    #     coco_eval.accumulate()
+    #     tmp = coco_eval.summarize()
+    #     res.append(tmp)
+    return res
 
 
-val_json_name = glob.glob(os.path.join('xray_pred',f'result_{NAME}?.json')) + glob.glob(os.path.join('xray_pred',f'result_{NAME}??.json'))
-# val_json_name = glob.glob(os.path.join('xray_pred/result_val?.json'))
+# val_json_name = glob.glob(os.path.join('xray_pred',f'result_{NAME}?.json')) + glob.glob(os.path.join('xray_pred',f'result_{NAME}??.json'))
+# val_json_name = ['xray_pred\\test_2.json']
+# val_json_name = [glob.glob(os.path.join('xray_pred/mocod_val*.json'))[3]]
+val_json_name = glob.glob(os.path.join('xray_pred2',f'mocod_{NAME}*.json'))
 print(val_json_name)
 pred_all = []
 #image_id和file_name对应
-with open(os.path.join('xray_pred', 'newinstances_val2017.json'), 'r') as f:
+with open(os.path.join('xray_pred2', 'newinstances_val2017.json'), 'r') as f:
     empty_test = json.load(f)
 img_map = {}
 for i in range(len(empty_test['images'])):
     img_map[empty_test['images'][i]['id']] = empty_test['images'][i]['file_name'].split('.')[0]
 
+# dict_class = {
+#         1:'Consolidation',
+#         2:'Fibrosis',
+#         3:'Effusion',
+#         4:'Nodule',
+#         5:'Mass',
+#         6:'Emphysema',
+#         7:'Calcification',
+#         8:'Atelectasis',
+#         9:'Fracture'
+#     }
 dict_class = {
-        1:'Consolidation',
-        2:'Fibrosis',
-        3:'Effusion',
-        4:'Nodule',
-        5:'Mass',
-        6:'Emphysema',
-        7:'Calcification',
-        8:'Atelectasis',
-        9:'Fracture'
-    }
+    1: 'Car',
+    2: 'Truck',
+    3: 'Van'
+}
 
 #数据结构defaultdict(defaultdict(list))
 
 ensembled_pred = defaultdict(lh_defaultlist)
 
-with open('stat.txt','r') as f:
-    stat=json.load(f)
+# with open('stat.txt','r') as f:
+#     stat=json.load(f)
 
 
 for i in val_json_name:
@@ -241,7 +250,8 @@ for i in val_json_name:
         pred_all += tmp
 
 for i in range(len(pred_all)):
-    if pred_all[i]['category_id'] not in list(range(1, 10)):
+    if pred_all[i]['category_id'] not in list(range(1, 4)):
+        print('不在目标类别里')
         continue
     # if pred_all[i]['category_id'] == 6:
     cid = pred_all[i]['category_id']
@@ -275,19 +285,19 @@ print('-' * 40 + '开始NMS测试' + '-' * 40)
 
 
 
-VAL_GT = os.path.join('xray_pred','newinstances_val2017.json')
+VAL_GT = os.path.join('xray_pred2','newinstances_val2017.json')
 coco_gt = COCO(VAL_GT)
 image_ids = coco_gt.getImgIds()
      
-IOU_list = list(np.linspace(0, 0.5, 51))
-# CONF_list = list(np.linspace(0, 0.5, 51))
-CONF_list=[0,0.005]
+IOU_list = list(np.linspace(0, 1.0, 11))
+CONF_list = list(np.linspace(0, 1.0, 11))
+# CONF_list=[0.05]
 # IOU_list = [0.5]
 # CONF_list = [0.01]
 # nms_style = ['OR', 'AND', 'MERGE','SOFT]
 # iou_type = ['IoU', 'GIoU', 'DIoU', 'CIoU']
 iou_type = ['DIoU','IoU']
-nms_style = ['MERGE','OR']
+nms_style = ['MERGE','OR','AND','SOFT']
 want = {}
 gt_nums = len(coco_gt.getAnnIds())
 max_metric = 0
@@ -304,12 +314,17 @@ def nms_optimal(typ, sty):
             for k, v in tmp_ensembled_pred.items():
                 for a, b in v.copy().items():
                     if len(b) != 0:
+                        # tmp_ensembled_pred[k][a] = tmp_ensembled_pred[k][a]
                         tmp_ensembled_pred[k][a] = lh_NMS(torch.tensor(b), conf_thresh=conf, iou_thresh=iou, style=sty ,type=typ)
 
             all_labels, nums = trans_2_standard_ann(tmp_ensembled_pred)
             print(f'预测框一共有{nums}个')
             if nums <= gt_nums:
                 print('框太少不予检测(免得报错)')
+                if tmp_max:
+                    print('当前最好成绩是type为{:^6},style为{:<5},iou阈值为{:.3f},conf阈值为{:.3f}下的指标为{}'.format(tmp_max[0],tmp_max[1],tmp_max[2],tmp_max[3],tmp_max[4:]))
+                else:
+                    print('当前还没有成功预测一次')
                 continue
             temp = _eval(coco_gt, image_ids, all_labels)
             # temp = _eval(coco_gt, image_ids, 'new_val.json')
@@ -370,7 +385,7 @@ def nms_optimal(typ, sty):
 #         break
 final_tmp = []
 imax = 0
-# with open(os.path.join('xray_pred','all_eva.json'),'w') as f:
+# with open(os.path.join('xray_pred2','all_eva.json'),'w') as f:
 #     for k, v in want.items():
 #         if v[-1] > imax:
 #             imax= v[-1]
@@ -399,9 +414,9 @@ def single_pred(typ, sty, iou, conf):
     # temp = _eval(coco_gt, image_ids,f'new_{NAME}.json')
     # print(f'type为{typ},style为{sty},iou阈值为{iou},conf阈值为{conf}下的指标为{temp}')
 
-single_pred('DIoU','MERGE',0.170,0.00)
-single_pred('DIoU','MERGE',0.250,0.00)
-single_pred('DIoU','MERGE',0.250,0.005)
+# single_pred('DIoU','MERGE',0.170,0.00)
+# single_pred('DIoU','MERGE',0.250,0.00)
+# single_pred('DIoU','MERGE',0.6,0.005)
 
 def output_test(typ, sty, iou, conf):
     tmp_ensembled_pred = Copy(ensembled_pred)
@@ -412,4 +427,5 @@ def output_test(typ, sty, iou, conf):
     all_labels, nums = trans_2_standard_ann(tmp_ensembled_pred, 1)
     print(f'预测框一共有{nums}个')
 
-# output_test('DIoU', 'MERGE', 0.170,0)
+output_test('DIoU', 'MERGE', 0.5,0.005)
+# output_test('DIoU','MERGE',0.6,0.005)

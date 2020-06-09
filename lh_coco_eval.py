@@ -624,17 +624,18 @@ class COCOeval:
                     s = s[t]
                 s = s[:,:, aind, mind]
             elif ap == 2:
-                tpr = self.eval['xray_recall']
-                xray_recall = tpr[0,:,:, 0, 2]
-                tmp = xray_recall.sum(axis=0) / 9
-                final_tmp = tmp[:3].mean()
-                lhfm = ' {:<18} {} @[ IoU={:<10} | area={:>6s} | maxDets={:>3s} ] = {:0.3f}'
-                print(lhfm.format('TPR[fpr=0.05]','ATPR','0.5','all','100',tmp[0]))
-                print(lhfm.format('TPR[fpr=0.10]','ATPR','0.5','all','100',tmp[1]))
-                print(lhfm.format('TPR[fpr=0.20]','ATPR','0.5','all','100',tmp[2]))
-                # print(lhfm.format('TPR[fpr=maxfpr]','ATPR','0.5','all','100',tmp[3]))
-                print(lhfm.format('Average TPR', 'ATPR', '0.5', 'all', '100', final_tmp))
-                return tmp[:3].tolist()+[final_tmp]
+                # tpr = self.eval['xray_recall']
+                # xray_recall = tpr[0,:,:, 0, 2]
+                # tmp = xray_recall.sum(axis=0) / 9
+                # final_tmp = tmp[:3].mean()
+                # lhfm = ' {:<18} {} @[ IoU={:<10} | area={:>6s} | maxDets={:>3s} ] = {:0.3f}'
+                # print(lhfm.format('TPR[fpr=0.05]','ATPR','0.5','all','100',tmp[0]))
+                # print(lhfm.format('TPR[fpr=0.10]','ATPR','0.5','all','100',tmp[1]))
+                # print(lhfm.format('TPR[fpr=0.20]','ATPR','0.5','all','100',tmp[2]))
+                # # print(lhfm.format('TPR[fpr=maxfpr]','ATPR','0.5','all','100',tmp[3]))
+                # print(lhfm.format('Average TPR', 'ATPR', '0.5', 'all', '100', final_tmp))
+                # return tmp[:3].tolist()+[final_tmp]
+                pass
 
             if ap != 2: 
                 if len(s[s>-1])==0:
@@ -658,7 +659,7 @@ class COCOeval:
             stats[10] = _summarize(0, areaRng='medium', maxDets=self.params.maxDets[2])
             stats[11] = _summarize(0, areaRng='large', maxDets=self.params.maxDets[2])
             tpr = _summarize(2)
-            return stats,tpr
+            return stats,stats[1]
         def _summarizeKps():
             stats = np.zeros((10,))
             stats[0] = _summarize(1, maxDets=20)
@@ -679,8 +680,8 @@ class COCOeval:
             summarize = _summarizeDets
         elif iouType == 'keypoints':
             summarize = _summarizeKps
-        self.stats, tpr = summarize()
-        return tpr
+        self.stats, mAP = summarize()
+        return mAP
 
     def __str__(self):
         self.summarize()
@@ -726,7 +727,7 @@ class Params:
 if __name__ == '__main__':
     from pycocotools.coco import COCO
     # from lh_coco_eval import COCOeval
-    VAL_GT = f'../REMOTE/datasets/coco_xray/annotations/newinstances_val2017.json'
+    VAL_GT = f'xray_pred2\\newinstances_val2017.json'
     MAX_IMAGES = 10000
     coco_gt = COCO(VAL_GT)
     image_ids = coco_gt.getImgIds()[:MAX_IMAGES] #设置最大检测图片数量
@@ -740,8 +741,8 @@ if __name__ == '__main__':
         coco_eval.params.imgIds = image_ids #如果检测图片数大于MAX_IMAGES 修改当前gt图片的id在MAX_IMAGES之内
         coco_eval.evaluate() #评估
         coco_eval.accumulate()
-        tpr = coco_eval.summarize()
-        return tpr
+        mAP = coco_eval.summarize()
+        return [mAP]*4
 
         # for cat in coco_pred.cats.values():
         #     print("{cat['name']}类的BBOX")
@@ -751,4 +752,4 @@ if __name__ == '__main__':
         #     coco_eval.accumulate()
         #     coco_eval.summarize()
 
-    _eval(coco_gt, image_ids, 'new_val.json')
+    _eval(coco_gt, image_ids, 'xray_pred2\mocod_val1_88_55.json')

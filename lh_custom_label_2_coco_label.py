@@ -130,7 +130,7 @@ for i in range(len(raw)):
     image["id"] = img_id
     image["file_name"]=raw[i]["file_name"].replace('.png','.jpg')
     pic = cv2.imread(os.path.join('train', raw[i]["file_name"]), 0)
-    w, h = pic.shape
+    h, w = pic.shape
     image['width'], image['height'] = w, h
     label['images'].append(image.copy())
     for j in range(len(raw[i]["syms"])):

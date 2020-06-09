@@ -19,7 +19,12 @@ dict_class = {
         '8':'Atelectasis',
         '9':'Fracture'
     }
-with open(os.path.join('..', 'REMOTE', 'datasets', 'coco_xray', 'annotations', 'newinstances_test2017.json'), 'r') as f:
+dict_class = {
+    1: 'det_test_Car',
+    2: 'det_test_Truck',
+    3: 'det_test_Van'
+}
+with open(os.path.join('xray_pred2', 'newinstances_test2017.json'), 'r') as f:
     empty_test = json.load(f)
 img_map = {}
 for i in range(len(empty_test['images'])):
@@ -68,6 +73,47 @@ def parse_annot_txt(name):
         with open(os.path.join(name + '_mmdetection', '{}.json'.format(k.split('.')[0])), 'w') as f:
             json.dump(v, f)
 
+def parse_annot_txt2(name):
+    with open(os.path.join(name)) as f:
+    # with open(os.path.join('xray_pred', name)) as f:
+        res = json.load(f)
+    ans = defaultdict(list)
+    for i in res:
+        img_name = img_map[i['image_id']].split('.')[0].title()
+        bbox = i['bbox']
+        bbox[2] += bbox[0]
+        bbox[3] += bbox[1]
+        conf = i['score']
+        ans[dict_class[i['category_id']]].append([img_name, conf, *bbox])
+    with open(os.path.join('xray_pred','trans_result.txt'),'w') as f:
+        for k in ans:
+            ans[k].sort(key=lambda x: x[0])
+            for i in ans[k]:
+                i = list(map(str, i))
+                f.write(' '.join(i)+'\n')
+
+
+def parse_annot_txt3(name):
+    with open(os.path.join( name)) as f:
+    # with open(os.path.join('xray_pred', name)) as f:
+        res = json.load(f)
+    ans = defaultdict(list)
+    for i in res:
+        img_name = img_map[i['image_id']].split('.')[0]
+        bbox = i['bbox']
+        bbox[2] += bbox[0]
+        bbox[3] += bbox[1]
+        conf = i['score']
+        ans[dict_class[i['category_id']]].append([img_name, conf, *bbox])
+    
+    for k in ans:
+        ans[k].sort(key=lambda x: x[0])
+        with open(os.path.join('results',f'{k}.txt'),'w') as f:
+            for i in ans[k]:
+                i = list(map(str, i))
+                f.write(' '.join(i)+'\n')
+
+    
 
 # parse_annot_txt('test')
-parse_annot_txt('final')
+parse_annot_txt3('new_test.json')

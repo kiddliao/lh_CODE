@@ -8,14 +8,15 @@ from torch.utils.data import Dataset, DataLoader
 from pycocotools.coco import COCO
 from torchvision import transforms
 #实现图片读取的数据管道
-os.chdir(os.path.join('..','REMOTE','datasets','coco_xray'))
+os.chdir(os.path.join('..','REMOTE','datasets','coco_mocod','obstruct'))
 class FlirDataset(Dataset):
     def __init__(self, root_dir, set_name, cal_mean_std=False, mean_std_path=None, transform=None):
         self.set_name = set_name
         self.root_dir = root_dir
         # self.img_path = glob.glob(os.path.join('coco',self.set_name,'*.jpg'))
         self.transform = transform
-        self.coco = COCO(os.path.join(self.root_dir, 'annotations', 'newinstances_' + self.set_name + '.json'))
+        self.coco = COCO(os.path.join(self.root_dir, 'newinstances_' + self.set_name + '.json'))
+        # self.coco = COCO(os.path.join(self.root_dir, 'annotations', 'newinstances_' + self.set_name + '.json'))
         self.image_ids = self.coco.getImgIds()  #获取image在标注文件里的id 0-n label["images"][0]["image_id"]
         self.load_classes()
         self.cal_mean_std = cal_mean_std
@@ -28,7 +29,7 @@ class FlirDataset(Dataset):
     def get_mean_std(self,mean_std_path):
         for i in range(len(self.image_ids)):
             img = self.load_image(i)
-            img=img.transpose(2,0,1) #HWC to CHW
+            img=img.transpose(2,0,1) #BGR 2 RGB
             for j in range(3):
                 self.means[j] += img[j, :, :].mean()
                 self.stdevs[j] += img[j, :, :].std()
@@ -71,8 +72,8 @@ class FlirDataset(Dataset):
         return sample
     def load_image(self, image_index):
         image_name = self.coco.loadImgs(self.image_ids[image_index])[0]  #loadImgs是返回一个列表 里面放的是label["images"][i]
-        image_path = os.path.join(self.root_dir, 'train', image_name['file_name'].replace('jpg','png'))
-        # image_path = os.path.join(self.root_dir, 'JPEGImages', image_name['file_name'])
+        # image_path = os.path.join(self.root_dir, 'train', image_name['file_name'].replace('jpg','png'))
+        image_path = os.path.join(self.root_dir, 'JPEGImages', image_name['file_name'])
         # image_path = os.path.join(self.root_dir, self.set_name, image_name['file_name'])
         #三通道图片
         img = cv2.imread(image_path)

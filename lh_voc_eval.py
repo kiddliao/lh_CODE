@@ -19,16 +19,10 @@ def convert(bbox, size=(1024,1024)):
 def parse_rec(filename):
     """ Parse a PASCAL VOC xml file """ 
     dict_class = {
-        '0':'Consolidation',
-        '1':'Fibrosis',
-        '2':'Effusion',
-        '3':'Nodule',
-        '4':'Mass',
-        '5':'Emphysema',
-        '6':'Calcification',
-        '7':'Atelectasis',
-        '8':'Fracture'
-    }
+        '0': 'Car',
+        '1': 'Ship',
+        '2': 'Plane',
+        '3':'Human'}
     objects = []
     list_obj = []
     with open(filename, 'r') as f:
@@ -136,7 +130,7 @@ def voc_eval(detpath,
     # read list of images
     with open(imagesetfile, 'rb') as f:
         lines = f.readlines()
-    imagenames = [x.decode().strip()[-9:-4] for x in lines]
+    imagenames = [x.decode().strip().split('/')[-1].split('.')[0] for x in lines]
     
 
     if not os.path.isfile(cachefile):
@@ -244,7 +238,7 @@ if __name__ == '__main__':
     mAP = []
     for i in range(len(sub_files)):
         class_name = sub_files[i].split(".txt")[0]
-        rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/coco_xray/labels/{}.txt','../datasets/coco_xray/valid.txt', class_name, '.')
+        rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/coco_mocod/obstruct/labels/{}.txt','../datasets/coco_mocod/obstruct/2007_val.txt', class_name, '.')
         # rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/voc_switch/VOCdevkit/VOC2007/Annotations/{}.xml', '../datasets/voc_switch/VOCdevkit/VOC2007/ImageSets/Main/test.txt', class_name, '.')
         print("{} :\t {} ".format(class_name, ap))
         mAP.append(ap)

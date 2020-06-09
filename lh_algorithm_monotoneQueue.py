@@ -1,3 +1,4 @@
+#单调队列
 nums = [1, 3, -1, -3, 5, 3, 6, 7]
 window = 3
 def monotoneQueue(nums, window):
