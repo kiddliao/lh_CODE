@@ -8,8 +8,8 @@ import xml.etree.ElementTree as ET
 import os
 import pickle
 import numpy as np
-
-def convert(bbox, size=(1024,1024)):
+#修改类名和图片长宽
+def convert(bbox, size=(640,512)):
     xmin = int((2*bbox[0]-bbox[2])*size[0]//2)
     xmax = int((2*bbox[0]+bbox[2])*size[0]//2)
     ymin = int((2*bbox[1]-bbox[3])*size[1]//2)
@@ -18,11 +18,16 @@ def convert(bbox, size=(1024,1024)):
 
 def parse_rec(filename):
     """ Parse a PASCAL VOC xml file """ 
-    dict_class = {
-        '0': 'Car',
-        '1': 'Ship',
-        '2': 'Plane',
-        '3':'Human'}
+    # dict_class = {
+    #     '0': 'Car',
+    #     '1': 'Ship',
+    #     '2': 'Plane',
+    #     '3':'Human'}
+    dict_class={
+        '0':'person',
+        '1':'bicycle',
+        '2':'car'
+    }
     objects = []
     list_obj = []
     with open(filename, 'r') as f:
@@ -238,7 +243,7 @@ if __name__ == '__main__':
     mAP = []
     for i in range(len(sub_files)):
         class_name = sub_files[i].split(".txt")[0]
-        rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/coco_mocod/obstruct/labels/{}.txt','../datasets/coco_mocod/obstruct/2007_val.txt', class_name, '.')
+        rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/coco_flir/labels/{}.txt','../datasets/coco_flir/valid.txt', class_name, '.')
         # rec, prec, ap = voc_eval('./results/{}.txt', '../datasets/voc_switch/VOCdevkit/VOC2007/Annotations/{}.xml', '../datasets/voc_switch/VOCdevkit/VOC2007/ImageSets/Main/test.txt', class_name, '.')
         print("{} :\t {} ".format(class_name, ap))
         mAP.append(ap)

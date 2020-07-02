@@ -17,18 +17,20 @@ category={1:'car',2:'ship',3:'plane',4:'human'}
 # 8:"Atelectasis",
 # 9:"Fracture"
 # }
-with open(os.path.join('newinstances_val2017.json'), 'r') as f:
+with open(os.path.join('newinstances_train2017.json'), 'r') as f:
 # with open(os.path.join('annotations','newinstances_train2017.json'), 'r') as f:
     label = json.load(f)
     images = label['images']
     categories = label['categories']
     annotations = label['annotations']
     random.shuffle(images)
-    for img in images[:200]:
+    stat=defaultdict(int)
+    for img in images:
+    # for img in images[:200]:
         bbox = []
         cid = 0
         img_name = img['file_name']
-        if 'ar' not in img_name:continue
+        # if 'ar' not in img_name:continue
         img_id = img['id']
         flag=0
         for res in annotations:#这两个if先后顺序很重要 倒换的话第二个if得变成elif
@@ -40,18 +42,19 @@ with open(os.path.join('newinstances_val2017.json'), 'r') as f:
         h_, w_, c_ = pic.shape
         for box in bbox:
             x, y, w, h, id = list(map(float, box))
+            stat[id]+=1                
             # x, y, w, h = x * w_, y * h_, w * w_, h * h_
             x, y, w, h, id = list(map(int, [x, y, w, h, id]))
-            cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度
-            cv2.putText(pic, '{}, {:.3f}'.format(category[id], 1),
-                        (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                        (255, 255, 0), 1)
-        cv2.namedWindow(img_name)
-        cv2.resizeWindow(img_name, 416, 416)
-        cv2.imshow(img_name, pic)
-        cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
+            # cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度
+            # cv2.putText(pic, '{}, {:.3f}'.format(category[id], 2),
+            #             (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0,
+            #             (255, 255, 0), 2)
+        # cv2.namedWindow(img_name,0)
+        # cv2.resizeWindow(img_name, 416, 416)
+        # cv2.imshow(img_name, pic)
+        # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+print(stat)
 # x-ray比赛的数据 统计信息
 
 # def lh_defaultdict():
