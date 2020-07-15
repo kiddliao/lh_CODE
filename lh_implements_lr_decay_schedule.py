@@ -19,8 +19,8 @@ def get_args():
     parser.add_argument('--optim', type=str, default='adamw', help='select optimizer for training, '
                                                                    'suggest using \'admaw\' until the'
                                                                    ' very final stage then switch to \'sgd\'')
-    parser.add_argument('--alpha', type=float, default=0.25, help='BN')
-    parser.add_argument('--gamma', type=float, default=1.5, help='BN')
+    parser.add_argument('--alpha', type=float, default=0.25, help='focal loss')
+    parser.add_argument('--gamma', type=float, default=1.5, help='focal loss')
     parser.add_argument('--num_epochs', type=int, default=500)
     parser.add_argument('--val_interval', type=int, default=1, help='Number of epoches between valing phases')
     parser.add_argument('--save_interval', type=int, default=100, help='Number of steps between saving')
@@ -45,7 +45,7 @@ class Params:
 
     def __getattr__(self, item):
         return self.params.get(item, None)
-    
+
 def train(opt):
     params = Params(f'projects/{opt.project}.yml') #读取各个路径和anchor和class
 
@@ -273,12 +273,12 @@ def train(opt):
                     save_checkpoint(model, f'best_efficientdet-d{opt.compound_coef}_{epoch}_{step}.pth')
 
                 model.train()
-                           
+
                 # Early stopping
                 if epoch - best_epoch > opt.es_patience > 0:
                     if num_decay:
                         num_decay-=1
-                        
+
                         optimizer.param_groups[0]['lr']/=10
                         x=optimizer.param_groups[0]['lr']
                         print(f'num_decay:{num_decay},learning_rate:{x}')
@@ -378,12 +378,12 @@ for epoch in range(opt.num_epochs):
             best_loss = loss
             best_epoch = epoch
             save_checkpoint(model, f'best_efficientdet-d{opt.compound_coef}_{epoch}_{step}.pth')
-        model.train()  
+        model.train()
         # Early stopping
         if epoch - best_epoch > opt.es_patience > 0:
             if num_decay:
                 num_decay-=1
-                
+
                 optimizer.param_groups[0]['lr']/=10
                 x=optimizer.param_groups[0]['lr']
                 print(f'num_decay:{num_decay},learning_rate:{x}')
@@ -463,7 +463,7 @@ for epoch in range(opt.num_epochs):
         writer.add_scalars('Loss', {'val': loss}, step)
         writer.add_scalars('Regression_loss', {'val': reg_loss}, step)
         writer.add_scalars('Classfication_loss', {'val': cls_loss}, step)
-        
+
 
 #api调整学习率
 decay_step = {40000: 0.1, 45000, 0.1}
@@ -485,7 +485,7 @@ scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
 #5 余弦退火 T_max 对应1/2个cos周期所对应的epoch数值 eta_min 为最小的lr值，默认为0
 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=20)
 #6 早停加学习率衰减 也就是loss不再降低或acc不再提高之后降低学习率
-# mode：'min'模式检测metric是否不再减小，'max'模式检测metric是否不再增大 
+# mode：'min'模式检测metric是否不再减小，'max'模式检测metric是否不再增大
 # factor: 触发条件后lr*=factor
 # patience:不再减小（或增大）的累计次数
 # verbose:触发条件后print
@@ -624,4 +624,4 @@ for epoch in range(opt.num_epochs):
         writer.add_scalars('Loss', {'val': loss}, step)
         writer.add_scalars('Regression_loss', {'val': reg_loss}, step)
         writer.add_scalars('Classfication_loss', {'val': cls_loss}, step)
-        
+

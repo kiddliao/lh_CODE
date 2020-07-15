@@ -29,7 +29,7 @@ class FlirDataset(Dataset):
     def get_mean_std(self,mean_std_path):
         for i in range(len(self.image_ids)):
             img = self.load_image(i)
-            img=img.transpose(2,0,1) #BGR 2 RGB
+            img = img.transpose(2,0,1) #hwc 2 chw
             for j in range(3):
                 self.means[j] += img[j, :, :].mean()
                 self.stdevs[j] += img[j, :, :].std()

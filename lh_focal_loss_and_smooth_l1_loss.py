@@ -22,7 +22,9 @@ def calc_iou(a, b):
     IOU = intersection / (area_a + area_b - intersection)
     return IoU
 
-
+a=torch.rand(507,4)
+b=torch.rand(7,4)
+c=calc_iou(a,b)
 class ModelWithLoss(nn.Module):
     def __init__(self, model):
         super().__init__()

@@ -8,7 +8,8 @@ import random
 # sets=[('2012', 'train'), ('2012', 'val'), ('2007', 'train'), ('2007', 'val'), ('2007', 'test')]
 sets=[('2007', 'train'), ('2007', 'val'),('2007', 'test')]
 
-classes = ['Car','Ship','Plane','Human']
+classes = []
+# classes = ['Car','Ship','Plane','Human']
 # classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 
 
@@ -40,8 +41,10 @@ def convert_annotation(year, image_id):
         cls = obj.find('name').text
         cls=cls.lower().title()
         # if cls not in classes or int(difficult)==1:
+        # if cls not in classes:
+        #     continue
         if cls not in classes:
-            continue
+            classes.append(cls.title())
         cls_id = classes.index(cls)
         xmlbox = obj.find('bndbox')
         b = (float(xmlbox.find('xmin').text), float(xmlbox.find('xmax').text), float(xmlbox.find('ymin').text), float(xmlbox.find('ymax').text))
@@ -49,7 +52,7 @@ def convert_annotation(year, image_id):
         out_file.write(str(cls_id) + " " + " ".join([str(a) for a in bb]) + '\n')
 
 wd = getcwd()
-voc = os.path.join('..', 'datasets', 'coco_mocod', 'obstruct')
+voc = os.path.join('..', 'datasets', 'coco_infrared')
 
 #将trainval划分为train和val
 with open(os.path.join(voc, 'Main', 'trainval.txt'), 'r') as f:

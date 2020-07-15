@@ -17,7 +17,7 @@ batch_size = 1
 #先求一下均值和方差
 training_set = FlirDataset(root_dir, set_name, mean_std_path=mspath
 , cal_mean_std=True, transform=transforms.Compose([
-    Normalizer(),Augmenter(),Resizer(1280)]))
+    Normalizer(mspath),Augmenter(),Resizer(1280)]))
 # a = training_set[0]  #取一个样本看看
 # cv2.imshow('image', a['img'].numpy())
 # cv2.waitKey(0)
