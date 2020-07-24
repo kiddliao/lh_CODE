@@ -18,10 +18,9 @@ os.makedirs('labels', exist_ok=True)
 # os.makedirs(os.path.join('labels','val'), exist_ok=True)
 
 
-
 def create_annot_txt(name):
-    with open(os.path.join('coco','annotations',f'newinstances_{name}2017.json'), 'r+',encoding='utf-8') as f:
-    # with open(os.path.join('..','datasets','FLIR_ADAS_1_3','val','thermal_annotations.json'), 'r+',encoding='utf-8') as f:
+    with open(os.path.join('annotations', f'instances_{name}2017.json'), 'r+', encoding='utf-8') as f:
+        # with open(os.path.join('..','datasets','FLIR_ADAS_1_3','val','thermal_annotations.json'), 'r+',encoding='utf-8') as f:
         res = json.load(f)
     class_id = res["categories"]
     annotations = res["annotations"]
@@ -29,7 +28,7 @@ def create_annot_txt(name):
     #建立image_id和file_name的映射
     dic = {}
     for i in images:
-        dic[i['id']]=i['file_name']
+        dic[i['id']] = i['file_name']
 
     #coco格式的bbox是(x,y,w,h)框左上角坐标和框宽高 转换成中心点坐标和框宽高
 
@@ -38,8 +37,8 @@ def create_annot_txt(name):
         file_name = dic[annotations[i]['image_id']]
         # if file_name == 'FLIR_05171.jpg':
         #     print(1)
-        pic = cv2.imread(os.path.join('JPEGImages',file_name))
-        pic_shape=list(pic.shape)
+        pic = cv2.imread(os.path.join('JPEGImages', file_name))
+        pic_shape = list(pic.shape)
         # cur_id = int(annotations[i]['image_id'])
         # real_id = str(init_id + cur_id).rjust(5, '0')
         label_id = annotations[i]['category_id']
@@ -51,16 +50,15 @@ def create_annot_txt(name):
         annotations[i]['bbox'][1] /= pic_shape[0]
         annotations[i]['bbox'][3] /= pic_shape[0]
 
-        
-        writein_label = ' '.join(list(map(str,[label_id-1] + annotations[i]['bbox']))) #录入的时候id-1
-        
-        with open(os.path.join('labels','{}.txt'.format(file_name.split('.')[0])), 'a+') as f:
-            f.write(writein_label+'\n')
-    
+        writein_label = ' '.join(list(map(str, [label_id - 1] + annotations[i]['bbox'])))  #录入的时候id-1
+
+        with open(os.path.join('labels', '{}.txt'.format(file_name.split('.')[0])), 'a+') as f:
+            f.write(writein_label + '\n')
+
+
 create_annot_txt('train')
 create_annot_txt('val')
 # create_annot_txt('test')
-
 
 #对无样本图片新建空标签文本 但是这个项目不接受空的label所以注释掉
 img_name = os.listdir('JPEGImages')
@@ -99,9 +97,9 @@ cur_path = os.getcwd()
 #         f.write(os.path.join(cur_path, 'images', val[i]) + '\n')
 
 #从json读取数据集分配
-with open(os.path.join('coco','annotations', 'newinstances_train2017.json'), 'r+', encoding='utf-8') as f:
+with open(os.path.join('annotations', 'instances_train2017.json'), 'r+', encoding='utf-8') as f:
     train = json.load(f)
-with open(os.path.join('coco','annotations', 'newinstances_val2017.json'), 'r+', encoding='utf-8') as f:
+with open(os.path.join('annotations', 'instances_val2017.json'), 'r+', encoding='utf-8') as f:
     val = json.load(f)
 train_name, val_name = set(), set()
 dic1 = {}
@@ -114,19 +112,17 @@ for i in val['images']:
 for i in train['annotations']:
     train_name.add(dic1[i['image_id']])
 for i in val['annotations']:
-    val_name.add(dic2[i['image_id']])  
+    val_name.add(dic2[i['image_id']])
 
-with open('train.txt','w') as f:
+with open('2007_train.txt', 'w') as f:
     for i in train_name:
         f.write(os.path.join(cur_path, 'JPEGImages', i) + '\n')
-with open('valid.txt','w') as f:
+with open('2007_val.txt', 'w') as f:
     for i in val_name:
         f.write(os.path.join(cur_path, 'JPEGImages', i) + '\n')
-with open('trainval.txt','w') as f:
-    for i in chain(train_name,val_name):
-        f.write(os.path.join(cur_path, 'JPEGImages',i) + '\n')
-    
-
+# with open('trainval.txt','w') as f:
+#     for i in chain(train_name,val_name):
+#         f.write(os.path.join(cur_path, 'JPEGImages',i) + '\n')
 
 #train的图片路径和label来生成kmeans的anchor
 # f1 = open('train.txt', 'r')
@@ -147,7 +143,7 @@ with open('trainval.txt','w') as f:
 #                 image_label += ','.join(cur_label)+' '
 #         write_in = image_path + ' ' + image_label.strip()
 #         f.write(write_in + '\n')
-        
+
 #把labels下的txt放入labels/train val test
 # def move(name, res):
 #     for i in res:
@@ -159,8 +155,6 @@ with open('trainval.txt','w') as f:
 # move('test', test)
 # move('val', val)
 
-
-# # os.system('cp test/*.jpg images')           
-# os.system('cp train/*.jpg images')           
-# os.system('cp val/*.jpg images')           
-    
+# # os.system('cp test/*.jpg images')
+# os.system('cp train/*.jpg images')
+# os.system('cp val/*.jpg images')

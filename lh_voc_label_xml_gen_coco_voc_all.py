@@ -254,7 +254,7 @@ def readjson(name):
 cur_path = os.getcwd()
 trainimg = readjson('train')
 valimg = readjson('val')
-testimg = readjson('test')
+# testimg = readjson('test')
 # with open('trainval.txt', 'w') as f:
 #     for i in chain(trainimg, valimg):
 #         f.write(i + '\n')
@@ -267,9 +267,9 @@ os.makedirs(os.path.join('ImageSets', 'Main'), exist_ok=True)
 with open(os.path.join('ImageSets', 'Main', 'train.txt'), 'w') as f:
     for i in trainimg:
         f.write(i + '\n')
-with open(os.path.join('ImageSets', 'Main', 'test.txt'), 'w') as f:
-    for i in testimg:
-        f.write(i + '\n')
+# with open(os.path.join('ImageSets', 'Main', 'test.txt'), 'w') as f:
+#     for i in testimg:
+#         f.write(i + '\n')
 with open(os.path.join('ImageSets', 'Main', 'val.txt'), 'w') as f:
     for i in valimg:
         f.write(i + '\n')

@@ -4,20 +4,22 @@ import random
 import json
 from collections import defaultdict
 #随机打印coco数据集图片以及gt框来检验数据集标注是否有问题 并计算统计特征
-os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_scanner'))
+os.chdir(os.path.join('..', 'datasets', 'coco_shape'))
 # category={1:'person',2:'bicycle',3:'car',4:'dog'}
-category = {
-    1: 'knife',
-    2: 'scissors',
-    3: 'lighter',
-    4: 'zippooil',
-    5: 'pressure',
-    6: 'slingshot',
-    7: 'handcuffs',
-    8: 'nailpolish',
-    9: 'powerbank',
-    10: 'firecrackers'
-}  # category={1:"Consolidation",
+# category = {
+#     1: 'knife',
+#     2: 'scissors',
+#     3: 'lighter',
+#     4: 'zippooil',
+#     5: 'pressure',
+#     6: 'slingshot',
+#     7: 'handcuffs',
+#     8: 'nailpolish',
+#     9: 'powerbank',
+#     10: 'firecrackers'
+# }
+category = {1: 'rectangle', 2: 'circle'}
+# category={1:"Consolidation",
 # 2:"Fibrosis",
 # 3:"Effusion",
 # 4:"Nodule",
@@ -48,7 +50,7 @@ with open(os.path.join('annotations', 'instances_train2017.json'), 'r') as f:
             if res['image_id'] == img_id:
                 flag += 1
                 bbox.append([*res['bbox'], res['category_id']])
-        pic = cv2.imread(os.path.join('JPEGImages', img_name))
+        pic = cv2.imread(os.path.join('train2017', img_name))
         h_, w_, c_ = pic.shape
         for box in bbox:
             x, y, w, h, id = list(map(float, box))
@@ -58,11 +60,14 @@ with open(os.path.join('annotations', 'instances_train2017.json'), 'r') as f:
             cv2.rectangle(pic, (x, y), (x + w, y + h), (0, 255, 0), 2)  #2是线的宽度
             cv2.putText(pic, '{}, {:.3f}'.format(category[id], 2), (x, y + 10), cv2.FONT_HERSHEY_SIMPLEX, 1.0,
                         (255, 255, 0), 2)
-        cv2.namedWindow(img_name, 0)
-        cv2.resizeWindow(img_name, 416, 416)
-        cv2.imshow(img_name, pic)
-        cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        cv2.imwrite(
+            os.path.join('/home', 'lh', 'myhome', 'Yolov3_tricks', 'images',
+                         '{}_visual.jpg'.format(img_name.split('.')[0])), pic)
+        # cv2.namedWindow(img_name, 0)
+        # cv2.resizeWindow(img_name, 416, 416)
+    #     cv2.imshow(img_name, pic)
+    #     cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 print(stat)
 # x-ray比赛的数据 统计信息
 

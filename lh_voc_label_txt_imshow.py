@@ -5,23 +5,25 @@ import json
 import glob
 from collections import defaultdict
 #随机打印voc数据集图片以及gt框来检验数据集标注是否有问题
-os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_scanner'))
+os.chdir(os.path.join('..', 'REMOTE', 'datasets', 'coco_shape'))
 pic_paths = glob.glob(os.path.join('JPEGImages','*.jpg'))
 pic = cv2.imread(pic_paths[0])
 pic_shape=list(pic.shape)
 stat=defaultdict(int)
-category={
-    1: 'knife',
-    2: 'scissors',
-    3: 'lighter',
-    4: 'zippooil',
-    5: 'pressure',
-    6: 'slingshot',
-    7: 'handcuffs',
-    8: 'nailpolish',
-    9: 'powerbank',
-    10: 'firecrackers'
-}
+# category={
+#     1: 'knife',
+#     2: 'scissors',
+#     3: 'lighter',
+#     4: 'zippooil',
+#     5: 'pressure',
+#     6: 'slingshot',
+#     7: 'handcuffs',
+#     8: 'nailpolish',
+#     9: 'powerbank',
+#     10: 'firecrackers'
+# }
+category = {1: 'rectangle', 2: 'circle'}
+
 label_paths = glob.glob(os.path.join('labels', '*.txt'))#直接读取每张图的标签
 # with open(os.path.join('train_all_labels.txt'), 'r') as f:#读取train_all_labels.txt的标签
     # label_paths = f.readlines()

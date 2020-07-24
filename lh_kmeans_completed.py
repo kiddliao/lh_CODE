@@ -1,9 +1,12 @@
 import numpy as np
 import os
-#记得修改读取长宽时乘上的原图长宽
-os.chdir(os.path.join('..','datasets','coco_mocod','obstruct'))
-class YOLO_Kmeans:
+import cv2
 
+
+#记得修改读取长宽时乘上的原图长宽
+#如果每张图大小不同 就读取图片长宽 这个脚本用的读取图片长宽 所以慢一点
+# os.chdir(os.path.join('..','datasets','coco_mocod','obstruct'))
+class YOLO_Kmeans:
     def __init__(self, cluster_number, filename):
         self.cluster_number = cluster_number
         self.filename = filename
@@ -39,10 +42,9 @@ class YOLO_Kmeans:
     def kmeans(self, boxes, k, dist=np.median):
         box_number = boxes.shape[0]
         distances = np.empty((box_number, k))
-        last_nearest = np.zeros((box_number,))
+        last_nearest = np.zeros((box_number, ))
         np.random.seed()
-        clusters = boxes[np.random.choice(
-            box_number, k, replace=False)]  # init k clusters
+        clusters = boxes[np.random.choice(box_number, k, replace=False)]  # init k clusters
         while True:
 
             distances = 1 - self.iou(boxes, clusters)
@@ -60,7 +62,7 @@ class YOLO_Kmeans:
 
     def result2txt(self, data):
         # f = open(os.path.join('.','model_data',"red_anchors.txt"), 'w')
-        f=open('anchor.txt','w')
+        f = open('anchor.txt', 'w')
         row = np.shape(data)[0]
         for i in range(row):
             if i == 0:
@@ -79,15 +81,17 @@ class YOLO_Kmeans:
         for line in range(len(cs)):
             infos = cs[line].strip().split(" ")
             length = len(infos)
-            if infos[-1]=='':continue #跳过无样本的图片
-            for i in range(1, length):
+            if infos[-1] == '': continue  #跳过无样本的图片
+            for i in range(3, length):
                 # width = int(infos[i].split(",")[2]) - \
                 #     int(infos[i].split(",")[0])
                 # height = int(infos[i].split(",")[3]) - \
                 #     int(infos[i].split(",")[1])
                 # try:
-                width = int(float(infos[i].split(",")[2])*1280)
-                height = int(float(infos[i].split(",")[3])*720)
+                w, h = int(infos[1]), int(infos[2])
+                pic = cv2.imread
+                width = int(float(infos[i].split(",")[2]) * w)
+                height = int(float(infos[i].split(",")[3]) * h)
                 dataSet.append([width, height])
                 # except Exception as e:print(line,cs[line],len(infos))
         result = np.array(dataSet)
@@ -100,8 +104,7 @@ class YOLO_Kmeans:
         result = result[np.lexsort(result.T[0, None])]
         self.result2txt(result)
         print("K anchors:\n {}".format(result))
-        print("Accuracy: {:.2f}%".format(
-            self.avg_iou(all_boxes, result) * 100))
+        print("Accuracy: {:.2f}%".format(self.avg_iou(all_boxes, result) * 100))
 
 
 if __name__ == "__main__":
@@ -118,7 +121,9 @@ if __name__ == "__main__":
     with open('train_all_labels.txt', 'w') as f:
         for i in train:
             image_path = i
-            image_name=image_path.split('/')[-1].split('.')[0]
+            image_name = image_path.split('/')[-1].split('.')[0]
+            pic = cv2.imread(os.path.join('JPEGImages', image_name + '.jpg'))
+            h, w, _ = pic.shape
             # image_name=image_path.split('\\')[-1].split('.')[0]
             # image_id = rg.search(image_path).group()
             with open(os.path.join('labels', image_name + '.txt'), 'r') as f2:
@@ -127,10 +132,10 @@ if __name__ == "__main__":
                 for j in range(len(labels)):
                     cur_label = labels[j].strip().split()
                     cur_label = cur_label[1:] + [cur_label[0]]
-                    image_label += ','.join(cur_label)+' '
-            write_in = image_path + ' ' + image_label.strip()
+                    image_label += ','.join(cur_label) + ' '
+            write_in = image_path + ' ' + str(w) + ' ' + str(h) + ' ' + image_label.strip()
             f.write(write_in + '\n')
-            
+
     filename = os.path.join('train_all_labels.txt')
     kmeans = YOLO_Kmeans(cluster_number, filename)
     kmeans.txt2clusters()
