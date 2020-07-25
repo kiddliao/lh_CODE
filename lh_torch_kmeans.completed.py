@@ -51,16 +51,17 @@ class KMeans:
     def kmeans(self, boxes):
         box_number = boxes.shape[0]
         last_nearest = torch.zeros(box_number).to(self.device)
-        # np.random.seed(42)
+        np.random.seed(42)
         #初始化k个中心点
         clusters = boxes[np.random.choice(box_number, self.cluster_number, replace=False)]  #replace代表不许重复
 
-        # plt.scatter(boxes[...,0],boxes[...,1],color='yellow',alpha=1,s=5)
-        # plt.scatter(clusters[:,0],clusters[:,1],color='black',alpha=1,s=100)
+        # plt.scatter(boxes[..., 0], boxes[..., 1], color='yellow', alpha=1, s=5)
+        # plt.scatter(clusters[:, 0], clusters[:, 1], color='black', alpha=1, s=100)
         # plt.show()
 
         while True:
             iou = self.IOU(boxes, clusters)
+            distances = 1. - iou
             iou_max, iou_argmax = torch.max(iou, dim=1)
             if (last_nearest == iou_argmax).all():
                 break
@@ -72,6 +73,8 @@ class KMeans:
             # plt.show()
         indices = torch.arange(9).to(self.device).unsqueeze(0).repeat(box_number, 1)
         map_indices = (indices == last_nearest.unsqueeze(-1))
+        #acc的计算方法 可以直接取每行的9个iou的最大值 我用的是每行与之匹配的anchor的iou 结果一样 因为每个点与最匹配的anchor的iou本来就是9个iou中的最大值
+        # acc = iou.max(dim=1).values.mean().item()
         iou = iou[map_indices]
         acc = iou.mean().item()
         clusters = clusters.tolist()
@@ -98,7 +101,8 @@ class KMeans:
 if __name__ == '__main__':
     cluster_number = 9
     colors = ['red', 'pink', 'blue', 'cyan', 'green', 'gray', 'orange', 'gold', 'purple']
-    path = os.path.join('/home', 'lh', 'myhome', 'datasets', 'coco_shape')
+    path = os.path.join('..', 'REMOTE', 'datasets', 'coco_shape')
+    # path = os.path.join('/home', 'lh', 'myhome', 'datasets', 'coco_shape')
     file_name = 'train_all_labels.txt'
     with open(os.path.join(path, '2007_train.txt'), 'r') as f:
         train = f.readlines()
