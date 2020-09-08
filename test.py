@@ -1,19 +1,24 @@
-class Solution:
-    def __init__(self):
-        self.dict = {}
-    def save(self,s):
-        s = s.strip().split(',')
-        for k_v in s:
-            k, v = k_v.split(':')
-            v = int(v)
-            self.dict[v] = k
-    def find_lucky_num(self,x):
-        return self.dict[x]
+if __name__=='__main__':
+    m, n = 4,3
+    nums = list(range(1, m * n + 1))
+    matrix = [[0] * n for _ in range(m)]
+    count = 0
+    for x in range(m):
+        i,j=x,0
+        while 0 <= j < n and 0 <= i < m:
+            matrix[i][j] = nums[count]
+            count += 1
+            i -= 1
+            j += 1
+    for x in range(1, n):
+        i, j = m - 1, x
+        while 0 <= j < n and 0 <= i < m:
+            matrix[i][j] = nums[count]
+            count += 1
+            i -= 1
+            j += 1
 
-if __name__ == '__main__':
-    a = Solution()
-    s = input()
-    lucky_num = int(input())
-    a.save(s)
-    res=a.find_lucky_num(lucky_num)
-    print(res)
+
+
+    
+

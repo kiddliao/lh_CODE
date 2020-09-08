@@ -1,36 +1,22 @@
-def core(n):
-    def index(i,cur):
-        if i == -1:
-            return list(range(1, n + 1))
-        else:
-            res = []
-            for i in nums:
-                if i not in visited and abs(cur[-1] - i) != 1:
-                    res.append(i)
-            return res
-
-    def backtrack(i, cur):
-        if len(cur) == len(nums):
-            res.append(cur.copy())
-            return
-        newindex = index(i,cur)
-        for x in newindex:
-            visited.add(x)
-            cur.append(x)
-            backtrack(x,cur)
-            visited.remove(x)
-            cur.pop()
-
-
-    visited = set()
-    nums = list(range(1, n + 1))
-    res=[]
-    backtrack(-1, [])
-    for i in res:
-        print(' '.join(list(map(str,i))))
-
-
-
+def core(s):
+    i = 0
+    while i < len(s):
+        if s[:i + 1] * (len(s) // len(s[:i + 1])) == s:
+            return s[:i + 1]
+        i += 1
+def gcd(a, b):
+    if b != 0:
+        return gcd(b, a % b)
+    else:
+        return a
 if __name__ == '__main__':
-    # n=int(input())
-    core(10)
+    s1 = 'abcabc'
+    s2 = 'abcabcabcabc'
+    t1, t2 = core(s1), core(s2)
+    n1, n2 = len(s1) // len(t1), len(s2) // len(t2)
+    if t1 != t2:
+        print('')
+    else:
+        n = gcd(n1, n2)
+        print(t1 * n)
+        
