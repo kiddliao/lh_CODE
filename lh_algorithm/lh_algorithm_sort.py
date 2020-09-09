@@ -1,4 +1,6 @@
 from math import log10
+import numpy as np
+import time
 #1插入排序
 #1.1直接插入排序
 #稳定排序 平均时间复杂度O(n^2) 当完全有序时有最好时间复杂度为O(n) 最坏时间复杂度为O(n^2) 空间复杂度为O(1)
@@ -257,26 +259,39 @@ def RadixSort(nums):
         nums[:] = cur[:]
     return nums
 
+def test_time(f, nums):
+    start = time.time()
+    res = f(nums)
+    end = time.time()
+    print('{}耗时{}s,检测结果如下:\n{}'.format(repr(f).split()[1], end - start, res[:100]))
+    
 
-
-nums = [27, 17, 3, 16, 13, 10, 1, 5, 7, 12, 4, 8, 9, 8, 0]
-# nums = [49, 38, 65, 97, 76, 13, 27, 49, 55, 4]
-# nums = [278, 109, 63, 930, 589, 184, 505, 269, 8, 83]
-res = InsertSort(nums.copy())
-print(res)
-res = BinaryInsertSort(nums.copy())
-print(res)
-res = ShellSort(nums.copy())
-print(res)
-res = BubbleSort(nums.copy())
-print(res)
-res = QuickSort(nums.copy())
-print(res)
-res = SelectSort(nums.copy())
-print(res)
-res = HeapSort(nums.copy())
-print(res)
-res = MergeSort(nums.copy())
-print(res)
-res = RadixSort(nums.copy())
-print(res)
+if __name__=='__main__':
+    # nums = [27, 17, 3, 16, 13, 10, 1, 5, 7, 12, 4, 8, 9, 8, 0]
+    # # nums = [49, 38, 65, 97, 76, 13, 27, 49, 55, 4]
+    # # nums = [278, 109, 63, 930, 589, 184, 505, 269, 8, 83]
+    # res = InsertSort(nums.copy())
+    # print(res)
+    # res = BinaryInsertSort(nums.copy())
+    # print(res)
+    # res = ShellSort(nums.copy())
+    # print(res)
+    # res = BubbleSort(nums.copy())
+    # print(res)
+    # res = QuickSort(nums.copy())
+    # print(res)
+    # res = SelectSort(nums.copy())
+    # print(res)
+    # res = HeapSort(nums.copy())
+    # print(res)
+    # res = MergeSort(nums.copy())
+    # print(res)
+    # res = RadixSort(nums.copy())
+    # print(res)
+    nums = np.arange(100000)
+    np.random.shuffle(nums)
+    nums = nums.tolist()
+    function_list = [InsertSort, BinaryInsertSort, ShellSort, BubbleSort, QuickSort, SelectSort, HeapSort, MergeSort, RadixSort]
+    for f in function_list:
+        test_time(f, nums.copy())
+    
