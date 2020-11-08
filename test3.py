@@ -1,36 +1,37 @@
-import math
+def core(matrix,m,n):
+    start = []
+    end = []
+    for i in range(m):
+        for j in range(n):
+            if matrix[i][j] == 'S':
+                start = [i, j]
+            if matrix[i][j] == 'E':
+                end = [i, j]
+    if not start or not end:
+        return False
+    queue = [start]
+    visited = set()
+    visited.add(tuple(start))
+    while queue:
+        if end in queue:
+            return True
+        x, y = queue.pop(0)
+        for ix, iy in [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]:
+            if 0 <= ix < m and 0 <= iy < n and (ix,iy) not in visited and matrix[ix][iy] in '.E':
+                queue.append([ix, iy])
+                visited.add((ix,iy))
+    return False
+    
+
 if __name__ == '__main__':
-    n = int(input())
-    nums = list(map(int, input().split()))
-    if n == 1:
-        if nums[0] == 0:
-            print('No')
+    T = int(input())
+    for _ in range(T):
+        m, n = list(map(int, input().split()))
+        matrix = []
+        for i in range(m):
+            matrix.append(list(input().strip()))
+        res = core(matrix,m,n)
+        if res:
+            print('YES')
         else:
-            print('{:.2f}'.format(-nums[1]/nums[0]))
-    elif n == 2:
-        a, b, c = nums
-        tmp = b ** 2 - 4 * a * c
-        if tmp < 0:
-            print('No')
-        elif tmp == 0:
-            x = (-b + tmp) / (2 * a)
-            print('{:.2f}'.format(x))
-        else:
-            x1 = (-b + tmp) / (2 * a)
-            x2 = (-b - tmp) / (2 * a)
-            print('{:.2f} {:.2f}'.format(x1, x2))
-    if n == 3:
-        a, b, c, d = nums
-        A = b ** 2 - 3 * a * c
-        B = b * c - 9 * a * d
-        C = c ** 2 - 3 * b * d
-        D = B ** 2 - 4 * A * C
-        if A == B == 0:
-            print('{.2f}'.format(-c / b))
-        elif D > 0:
-            Y1 = A*b + 3 * a * (1 / 2 * (-B + (D ** (1 / 2))))
-            Y2 = A*b + 3 * a * (1 / 2 * (-B - (D ** (1 / 2))))
-            print('{:.2f}'.format(1 / (3 * a) * (-b - Y1 ** (1 / 3) - Y2 ** (1 / 3))))
-        elif D == 0:
-            K = B / A
-            print('{:.2f} {:.2f}'.format(-b / a + K, -K / 2))
+            print('NO')

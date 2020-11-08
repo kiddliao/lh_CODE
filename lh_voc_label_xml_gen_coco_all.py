@@ -52,9 +52,9 @@ for i in range(len(xmlpaths)):
     images['extra_info'] = {}
     images['subdirs'] = '.'
     images['id'] = image_id
-    images['width'] = root.find('size').find('width').text
+    images['width'] = int(root.find('size').find('width').text)
     images['file_name'] = root.find('filename').text.strip().split('/')[-1] + '.jpg'
-    images['height'] = root.find('size').find('height').text
+    images['height'] = int(root.find('size').find('height').text)
     label['images'].append(images.copy())
     for obj in root.iter('object'):
         cls = obj.find('name').text.lower()
